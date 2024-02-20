@@ -165,3 +165,60 @@ const gameBoard: CellValue[][] = [
   ['o', 'x', 'o'],
   ['x', '', 'o'],
 ];
+
+
+// interface
+
+interface User {
+  name: string;
+  id: number;
+}
+
+const user: User = {
+  name: 'jhordan',
+  id: 1,
+}
+// const user: Array<User> = [
+//   {
+//     name: 'jhordan',
+//     id: 1,
+//   },
+//   {
+//     name: 'luis',
+//     id: 2,
+//   }
+// ];
+
+console.log(user);
+
+
+type MyBool = true | false;
+
+
+/**
+ ** @ es posible que tenga una función que tome arrayo string:
+ */
+
+ function getLength(obj: string | string[]) {
+  return obj.length;
+}
+
+getLength('Jhordan')
+getLength(['Jhordan', 'Luis'])
+
+
+
+/**  sistema de tipo estructural  */
+
+interface Point {
+  x: number;
+  y: number;
+}
+ 
+function logPoint(p: Point) {
+  console.log(`${p.x}, ${p.y}`);
+}
+ 
+// logs "12, 26"
+const point = { x: 12, y: 26 };
+logPoint(point);
