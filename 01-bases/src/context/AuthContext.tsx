@@ -18,7 +18,14 @@ interface AuthContextType {
     login: (name: string, email: string) => void;
     logout: () => void;
     status: AuthStatus;
+    loginWithEmailPassword: (email: string, password: string) => void;
 }
+
+interface User {
+    name: string;
+    email: string;
+}
+
 
 
 // 2. We created the "board" with initial values
@@ -39,7 +46,21 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
+    const [user, setUser] = useState<User>();
     const [status, setStatus] = useState<AuthStatus>(AuthStatus.Unauthenticated);
+
+
+    const loginWithEmailPassword = (emailValue: string, _password: string) => {
+        setStatus(AuthStatus.Checking);
+        setTimeout(() => {
+            setIsLoggedIn(true);
+            setUsername("Jhordan Solis 🧑🏾‍🦱");
+            setEmail(emailValue);
+            setUser({ name: "Jhordan Solis 🧑🏾‍🦱", email: emailValue })
+            setStatus(AuthStatus.Authenticated);
+        }, 5000);
+    };
+
 
     const login = (nameValue: string, emailValue: string) => {
         // Mostrar "checking" mientras simula la petición
@@ -62,7 +83,15 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, username, email, login, logout, status }}>
+        <AuthContext.Provider value={{
+            isLoggedIn,
+            username,
+            email,
+            login,
+            logout,
+            status,
+            loginWithEmailPassword
+        }}>
             {children}
         </AuthContext.Provider>
     );

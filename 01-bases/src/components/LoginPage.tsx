@@ -3,17 +3,16 @@ import { useAuthContext } from "../context/AuthContext"
 
 export const LoginPage = () => {
 
-    const { status, login, logout, isLoggedIn, username, email } = useAuthContext();
+    const { status, login, logout, isLoggedIn, username, email, loginWithEmailPassword } = useAuthContext();
 
     const isLoading = status === "checking";
 
     return (
-        <>
+        <div>
             <h3>login 😁</h3>
 
             <span>Status: {status}</span>
             <br />
-
             <span>Name: {username}</span>
             <br />
             <span>Email: {email}</span>
@@ -23,7 +22,7 @@ export const LoginPage = () => {
                 <div style={{
                     marginTop: '10px',
                     padding: '15px',
-                    backgroundColor: '#2196F3',
+                    backgroundColor: '#4A90E2',
                     color: 'white',
                     borderRadius: '5px',
                     fontWeight: 'bold'
@@ -33,16 +32,22 @@ export const LoginPage = () => {
             )}
             <br />
 
-            {isLoggedIn ? (
-                <button onClick={logout}>Logout</button>
-            ) : (
-                <button
-                    onClick={() => login("JhordanS", "jordan@gmail.com")}
-                    disabled={isLoading}
-                >
-                    {isLoading ? "Cargando..." : "Login"}
-                </button>
-            )}
-        </>
+            {
+                isLoggedIn ? (
+                    <>
+                        <h5> Ingresa a la app 👋</h5>
+                        <button onClick={logout}>Logout</button>
+                    </>
+                ) : (
+                    <button
+                        // onClick={() => login("JhordanS", "jordan@gmail.com")}
+                        onClick={() => loginWithEmailPassword("jordan@gmail.com", "123456")}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "Cargando..." : "Login"}
+                    </button>
+                )
+            }
+        </div>
     )
 }
