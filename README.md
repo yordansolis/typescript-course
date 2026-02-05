@@ -1,5 +1,188 @@
 # Curso de React Native - Expo
 
+---
+
+## Estructura Ideal de un Componente React
+
+> Referencia rapida: abre esto cuando estes codificando y no recuerdes el orden.
+
+### Orden y para que sirve cada parte
+
+| #  | Seccion              | Para que sirve                                                        |
+|----|----------------------|-----------------------------------------------------------------------|
+| 1  | **Imports**          | Traer todo lo que necesitas (hooks, componentes, estilos, utilidades) |
+| 2  | **Tipos/Interfaces** | Definir la forma de los datos que recibe tu componente (props)        |
+| 3  | **Componente**       | La funcion principal que React va a renderizar                        |
+| 4  | **Hooks**            | Estado local (`useState`) y valores derivados (`useMemo`, etc.)       |
+| 5  | **Efectos**          | Codigo que se ejecuta cuando algo cambia (`useEffect`)                |
+| 6  | **Funciones**        | Logica y handlers de eventos (onClick, onChange, etc.)                |
+| 7  | **JSX**              | Lo que el usuario ve en pantalla (el return)                          |
+
+### Diagrama UML - Orden de un Componente React
+
+```
+┌─────────────────────────────────────────────────────┐
+│              Archivo MiComponente.tsx                │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  1. IMPORTS                                         │
+│  ┌───────────────────────────────────────────────┐  │
+│  │ import { useState, useEffect } from "react"   │  │
+│  │ import { MiServicio } from "../services"       │  │
+│  └───────────────────────┬───────────────────────┘  │
+│                          │                          │
+│                          ▼                          │
+│  2. TIPOS / INTERFACES                              │
+│  ┌───────────────────────────────────────────────┐  │
+│  │ interface Props {                              │  │
+│  │   title: string                                │  │
+│  │ }                                              │  │
+│  └───────────────────────┬───────────────────────┘  │
+│                          │                          │
+│                          ▼                          │
+│  3. COMPONENTE (funcion principal)                  │
+│  ┌───────────────────────────────────────────────┐  │
+│  │ export function MiComponente({ title }: Props) │  │
+│  │ {                                              │  │
+│  │                                                │  │
+│  │   4. HOOKS ──────────► useState, useContext     │  │
+│  │         │                                      │  │
+│  │         ▼                                      │  │
+│  │   5. EFECTOS ────────► useEffect               │  │
+│  │         │                                      │  │
+│  │         ▼                                      │  │
+│  │   6. FUNCIONES ──────► handlers, logica        │  │
+│  │         │                                      │  │
+│  │         ▼                                      │  │
+│  │   7. JSX (return) ──► Lo que se ve en pantalla │  │
+│  │                                                │  │
+│  │ }                                              │  │
+│  └───────────────────────────────────────────────┘  │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+### Separacion de archivos - Cuando el proyecto crece
+
+> No metas todo en un solo archivo. Separa por responsabilidad para que sea facil encontrar las cosas.
+
+| Carpeta           | Que va ahi                                    | Ejemplo                          |
+|-------------------|-----------------------------------------------|----------------------------------|
+| `components/`     | Piezas de UI reutilizables                    | `Button.tsx`, `Card.tsx`         |
+| `screens/` o `pages/` | Pantallas completas (una por ruta)       | `LoginScreen.tsx`, `Home.tsx`    |
+| `hooks/`          | Hooks personalizados (logica reutilizable)    | `useAuth.ts`, `useForm.ts`      |
+| `context/`        | Providers y contextos globales                | `AuthContext.tsx`, `ThemeContext.tsx` |
+| `services/` o `api/` | Llamadas a APIs y logica de red           | `authService.ts`, `userApi.ts`  |
+| `interfaces/`     | Tipos e interfaces compartidos                | `User.ts`, `Product.ts`         |
+| `utils/`          | Funciones auxiliares puras                    | `formatDate.ts`, `validators.ts`|
+| `styles/`         | Estilos globales o temas                      | `theme.ts`, `globalStyles.ts`   |
+
+### Diagrama UML - Estructura de carpetas
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        src/                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────┐   importa tipos   ┌─────────────────┐     │
+│  │ interfaces/ │◄──────────────────│   components/    │     │
+│  │             │                    │                  │     │
+│  │ User.ts     │◄────────┐         │ Button.tsx       │     │
+│  │ Product.ts  │         │         │ Card.tsx         │     │
+│  └─────────────┘         │         └────────┬─────────┘     │
+│                          │                  │ usa            │
+│                          │                  ▼                │
+│  ┌─────────────┐         │         ┌─────────────────┐      │
+│  │  services/  │         │         │    screens/      │      │
+│  │             │         │         │                  │      │
+│  │ authApi.ts  │◄────────┼─────────│ LoginScreen.tsx  │      │
+│  │ userApi.ts  │         │         │ HomeScreen.tsx   │      │
+│  └─────────────┘         │         └────────┬─────────┘      │
+│                          │                  │ consume         │
+│                          │                  ▼                │
+│  ┌─────────────┐         │         ┌─────────────────┐      │
+│  │   hooks/    │         │         │    context/      │      │
+│  │             │─────────┘         │                  │      │
+│  │ useAuth.ts  │◄──────────────────│ AuthContext.tsx   │      │
+│  │ useForm.ts  │                   │ ThemeContext.tsx  │      │
+│  └─────────────┘                   └─────────────────┘      │
+│                                                             │
+│  ┌─────────────┐                   ┌─────────────────┐      │
+│  │   utils/    │                   │    styles/       │      │
+│  │             │                   │                  │      │
+│  │ formatDate  │                   │ theme.ts         │      │
+│  │ validators  │                   │ globalStyles.ts  │      │
+│  └─────────────┘                   └─────────────────┘      │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+Flujo de dependencias:
+  screens ──► components ──► hooks ──► services ──► interfaces
+                  │                       │
+                  └───────► context ◄─────┘
+                               │
+                            utils / styles
+```
+
+### Ejemplo completo - Componente con archivos separados
+
+**`interfaces/User.ts`** - Solo el tipo
+```ts
+export interface User {
+  id: number
+  name: string
+  email: string
+}
+```
+
+**`services/userApi.ts`** - Solo la llamada al API
+```ts
+import { User } from "../interfaces/User"
+
+export const getUsers = async (): Promise<User[]> => {
+  const res = await fetch("https://api.example.com/users")
+  return res.json()
+}
+```
+
+**`hooks/useUsers.ts`** - Solo la logica
+```ts
+import { useState, useEffect } from "react"
+import { User } from "../interfaces/User"
+import { getUsers } from "../services/userApi"
+
+export const useUsers = () => {
+  const [users, setUsers] = useState<User[]>([])
+
+  useEffect(() => {
+    getUsers().then(setUsers)
+  }, [])
+
+  return { users }
+}
+```
+
+**`components/UserList.tsx`** - Solo la UI
+```tsx
+import { useUsers } from "../hooks/useUsers"
+
+export function UserList() {
+  const { users } = useUsers()
+
+  return (
+    <ul>
+      {users.map(u => (
+        <li key={u.id}>{u.name}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+> **Regla simple:** Si un archivo tiene mas de 150 lineas, probablemente puedes separarlo.
+
+---
+
 |                               |                               |
 |:-----------------------------:|:-----------------------------:|
 | [React Native](https://reactnative.dev/) | [Expo](https://docs.expo.dev/) |
@@ -512,3 +695,78 @@ Usuario          LoginPage       useAuthContext      AuthProvider
 | AuthProvider      | Maneja el estado y lógica de autenticación  |
 | useAuthContext    | Hook para acceder al contexto de forma segura|
 | LoginPage         | UI que consume el contexto y dispara acciones|
+
+#Diagrama de Secuencia UML
+Explicación de handleSubmit en React Hook Form
+ 
+```
+┌─────────┐          ┌──────────────┐          ┌─────────────┐          ┌──────────┐
+│ Usuario │          │    <form>    │          │handleSubmit │          │ onSubmit │
+└────┬────┘          └──────┬───────┘          └──────┬──────┘          └────┬─────┘
+     │                      │                         │                      │
+     │  1. Click "Ingresar" │                         │                      │
+     │─────────────────────>│                         │                      │
+     │                      │                         │                      │
+     │                      │  2. Dispara evento      │                      │
+     │                      │     onSubmit            │                      │
+     │                      │────────────────────────>│                      │
+     │                      │                         │                      │
+     │                      │                         │  3. Previene envío   │
+     │                      │                         │     por defecto      │
+     │                      │                         │  (preventDefault)    │
+     │                      │                         │                      │
+     │                      │                         │  4. Valida campos    │
+     │                      │                         │  (required, etc.)    │
+     │                      │                         │                      │
+     │                      │                         │        ┌─────────────┴─────────────┐
+     │                      │                         │        │  ¿Validación exitosa?     │
+     │                      │                         │        └─────────────┬─────────────┘
+     │                      │                         │                      │
+     │                      │                         │  5. SI: Llama a      │
+     │                      │                         │     onSubmit con     │
+     │                      │                         │     los datos        │
+     │                      │                         │─────────────────────>│
+     │                      │                         │                      │
+     │                      │                         │                      │  6. Ejecuta
+     │                      │                         │                      │  console.log(myForm)
+     │                      │                         │                      │
+     │                      │                         │  NO: Muestra errores │
+     │                      │                         │<─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─│
+     │                      │                         │                      │
+
+```
+
+
+
+## EXPO
+ npx create-expo-app@latest testing-app --template  blank-typescript
+
+
+
+ comando para iniciar:
+ unset CI && npm start
+
+
+
+
+# Temas puntuales 
+Para iniciar un proyecto de React Native: https://docs.expo.dev/more/create-expo/#--template 
+
+si queremos instalar el proyecto con un template:  npx create-expo-app@latest --templat  name 
+
+- TouchableOpacity
+
+- Pressable
+
+- StatusBar
+
+- Views
+
+- StyleSheet
+
+- Text
+
+
+
+
+*(Ver seccion "Estructura Ideal de un Componente React" al inicio del README)*
