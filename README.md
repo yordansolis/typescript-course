@@ -62,6 +62,171 @@
 └─────────────────────────────────────────────────────┘
 ```
 
+### 🎁 Props - Como viajan los datos entre componentes
+
+> Los **props** son el sistema de correo de React: un componente padre le envia un "paquete" de datos a su hijo.
+
+#### Conceptos clave
+
+| Concepto                  | Que significa                                                                 |
+|---------------------------|-------------------------------------------------------------------------------|
+| **Props**                 | Datos que un padre le pasa a un hijo (como argumentos de una funcion)         |
+| **Solo bajan (top-down)** | Los datos viajan de padre → hijo, nunca al reves                              |
+| **Solo lectura**          | El hijo NO puede modificar los props que recibe, solo leerlos                 |
+| **Interface / Type**      | Define la "forma" del paquete: que datos lleva y de que tipo son              |
+| **children**              | Prop especial: es todo lo que pones DENTRO de las etiquetas del componente    |
+| **Callback props**        | Funciones que el padre pasa al hijo para que el hijo le "avise" de algo       |
+
+#### Diagrama UML - Flujo de Props entre componentes
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                     FLUJO DE PROPS EN REACT                              │
+│                                                                          │
+│   Los datos SIEMPRE bajan: Padre ──► Hijo (nunca al reves)              │
+│   Si el hijo quiere "hablarle" al padre, usa un callback prop           │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────┐          │
+│  │                    APP (Padre)                              │          │
+│  │                                                            │          │
+│  │  const [usuario, setUsuario] = useState("Ana")             │          │
+│  │  const [items, setItems] = useState(["🍎","🍕","🎮"])       │          │
+│  │                                                            │          │
+│  │  return (                                                  │          │
+│  │    <>                                                      │          │
+│  │      <Header nombre={usuario} />                           │          │
+│  │      <ProductList items={items} />                         │          │
+│  │      <LoginForm onLogin={(name) => setUsuario(name)} />    │          │
+│  │    </>                                                     │          │
+│  │  )                                                         │          │
+│  └──────┬──────────────────┬────────────────────┬─────────────┘          │
+│         │                  │                    │                         │
+│         │ nombre="Ana"     │ items=["🍎","🍕","🎮"]  │ onLogin=(fn)        │
+│         │ (string)         │ (string[])         │ (callback)             │
+│         ▼                  ▼                    ▼                         │
+│  ┌──────────────┐  ┌───────────────┐  ┌──────────────────────┐           │
+│  │   Header     │  │  ProductList  │  │     LoginForm        │           │
+│  │              │  │               │  │                      │           │
+│  │ Lee:         │  │ Lee:          │  │ Lee:                 │           │
+│  │ props.nombre │  │ props.items   │  │ props.onLogin        │           │
+│  │              │  │               │  │                      │           │
+│  │ Muestra:     │  │ Recorre:      │  │ Cuando el usuario    │           │
+│  │ "Hola, Ana"  │  │ cada item     │  │ envia el form:       │           │
+│  │              │  │ con .map()    │  │ onLogin("Pedro")     │           │
+│  │ ⛔ NO puede  │  │               │  │                      │           │
+│  │ cambiar      │  │ ⛔ NO puede   │  │ 🔼 Asi el hijo le    │           │
+│  │ "nombre"     │  │ cambiar       │  │ "avisa" al padre     │           │
+│  │              │  │ "items"       │  │                      │           │
+│  └──────────────┘  └───────┬───────┘  └──────────────────────┘           │
+│                            │                                             │
+│                            │ item="🍎" (pasa a otro hijo)                │
+│                            ▼                                             │
+│                    ┌───────────────┐                                      │
+│                    │  ProductCard  │                                      │
+│                    │               │                                      │
+│                    │ Lee:          │                                      │
+│                    │ props.item    │                                      │
+│                    │               │                                      │
+│                    │ Muestra: "🍎" │                                      │
+│                    └───────────────┘                                      │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+Resumen del flujo:
+  App ──(nombre)──► Header           Dato simple (string)
+  App ──(items)───► ProductList      Dato complejo (array)
+  App ──(onLogin)─► LoginForm        Callback (funcion)
+  ProductList ──(item)──► ProductCard   Prop que se reenvía a otro hijo
+```
+
+#### Diagrama UML - Tipos de Props
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    TIPOS DE PROPS                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1️⃣ DATOS SIMPLES (el padre envia un valor)                     │
+│  ┌────────────┐  nombre="Ana"   ┌────────────┐                 │
+│  │   Padre    │ ───────────────►│    Hijo    │                  │
+│  └────────────┘   (solo lectura) └────────────┘                 │
+│                                                                 │
+│  2️⃣ CALLBACKS (el hijo le avisa al padre)                        │
+│  ┌────────────┐  onLogin=(fn)   ┌────────────┐                 │
+│  │   Padre    │ ───────────────►│    Hijo    │                  │
+│  └────────────┘                 └─────┬──────┘                  │
+│        ▲                              │                         │
+│        │   onLogin("Pedro")           │                         │
+│        └──────────────────────────────┘                         │
+│        El padre recibe el dato que el hijo le manda             │
+│                                                                 │
+│  3️⃣ CHILDREN (contenido dentro de las etiquetas)                │
+│  ┌────────────────────────────────────────────┐                 │
+│  │  <Card>                                    │                 │
+│  │    <p>Todo esto es children</p>  ──────────┼──► children     │
+│  │  </Card>                                   │                 │
+│  └────────────────────────────────────────────┘                 │
+│                                                                 │
+│  4️⃣ OBJETOS / ARRAYS (datos complejos)                          │
+│  ┌────────────┐  user={id,name}  ┌────────────┐                │
+│  │   Padre    │ ────────────────►│    Hijo    │                 │
+│  └────────────┘  items={[...]}   └────────────┘                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Ejemplo completo con TypeScript
+
+```tsx
+// 1. Definir la interface (el contrato del paquete)
+interface CardProps {
+  title: string                       // dato simple
+  price: number                       // dato simple
+  tags: string[]                      // array
+  onBuy: (id: number) => void         // callback
+  children?: React.ReactNode          // contenido opcional
+}
+
+// 2. El componente hijo recibe y usa los props
+function Card({ title, price, tags, onBuy, children }: CardProps) {
+  return (
+    <div>
+      <h2>{title}</h2>
+      <p>${price}</p>
+      <ul>
+        {tags.map(tag => <li key={tag}>{tag}</li>)}
+      </ul>
+      <button onClick={() => onBuy(1)}>Comprar</button>
+      {children}
+    </div>
+  )
+}
+
+// 3. El componente padre envia los props
+function App() {
+  const handleBuy = (id: number) => {
+    console.log("Compraste el producto:", id)
+  }
+
+  return (
+    <Card
+      title="Laptop"
+      price={999}
+      tags={["tech", "oferta"]}
+      onBuy={handleBuy}
+    >
+      <p>Envio gratis!</p>   {/* Esto es children */}
+    </Card>
+  )
+}
+```
+
+> **Regla:** Si el hijo necesita "hablarle" al padre, el padre le pasa una funcion como prop (callback). Nunca modifiques un prop directamente.
+
+---
+
 ### Separacion de archivos - Cuando el proyecto crece
 
 > No metas todo en un solo archivo. Separa por responsabilidad para que sea facil encontrar las cosas.
